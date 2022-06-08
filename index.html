@@ -1,4 +1,7 @@
---- layout: default title: HPC manual ---
+--- 
+layout: default 
+title: HPC manual 
+---
 <div class="layout-clone" style='max-width: 64rem;padding: 2rem 6rem;margin:0 auto;font-size: 1.1rem;font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;'>
     <style>
         pre {
@@ -31,6 +34,7 @@ conda activate ml_pipeline_x86_64</code></pre>
         <li>Write computational expensive code (<strong>Can't access projects directory from compute node</strong>)</li>
         <li>Test and execute your code. Log results to <a href="http://mlflow.172.26.62.216.nip.io/#/">http://mlflow.172.26.62.216.nip.io/#/</a></li>
         <li>Move code execution to a <a href="https://doc.zih.tu-dresden.de/jobs_and_resources/slurm/#batch-jobs">sbatch file</a> and execute it from login node.</li>
+        <li>Control the state of your Slurm job via <code>sacct</code></li>
     </ol>
     <h2>
         <g-emoji class="g-emoji" alias="book" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4d6.png">📖</g-emoji>
