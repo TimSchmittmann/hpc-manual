@@ -1,9 +1,157 @@
----
-layout: default
-title: HPC manual
----
-Just some text
-<div style="width: 100vw;position: absolute;left: 0;display: flex;justify-content: center;">
-<iframe src="programming_on_hpc.html" height="760" width="1162" ></iframe>    
+--- layout: default title: HPC manual ---
+<div class="layout-clone" style='max-width: 64rem;padding: 2rem 6rem;margin:0 auto;font-size: 1.1rem;font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;'>
+    <style>
+        pre {
+            background: #eee;
+            padding: 1em;
+            margin: 1em 0;
+        }
+        
+        code {
+            font-size: 0.95rem;
+        }
+    </style>
+    <h2>
+        <g-emoji class="g-emoji" alias="zap" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/26a1.png">⚡️</g-emoji>
+        Quick start
+    </h2>
+    <ol>
+        <li>Connect to ZIH network (e.g. via <a href="https://tu-dresden.de/zih/dienste/service-katalog/arbeitsumgebung/zugang_datennetz/vpn/ssl_vpn">Cisco anyconnect</a>)</li>
+        <li>Login to HPC via <pre><code>ssh YOUR-ZIH-sNUMBER@taurus.hrsk.tu-dresden.de</code></pre> or <a href="https://taurus.hrsk.tu-dresden.de/jupyter/hub/spawn">JupyterHub</a></li>
+        <li>Check some of our code at <code>/project/p_ai4hematology/code/s7740678/mds_diagnosis/</code> and data at <code>/beegfs/ws/1/s7740678-data_01/</code> (<strong>DO NOT MODIFY</strong>, instead copy/clone it)</li>
+        <li>Load conda environment (<strong>Temporarily disabled</strong>):
+            <pre><code>source /beegfs/ws/1/s7740678-condahome_01/x86_64/set_conda.sh
+conda activate ml_pipeline_x86_64</code></pre>
+        </li>
+        <li>Write your own code inside the home or projects directory or inside a <a href="https://doc.zih.tu-dresden.de/data_lifecycle/workspaces/">workspace</a></li>
+        <li>Login to tmux session on alpha partition <pre><code>run --pty -p alpha -n 1 -c 8 --gres=gpu:1 --mem=16G -C fs_beegfs -t 12:00:00 tmux</code></pre></li>
+        <li>Reload conda environment (step 4)</li>
+        <li>Use the DataRepo at <code>/projects/p_ai4hematology/code/s7740678/mds_diagnosis/libs/bms_ml_tools/bms_ml_tools/util/data_preparation.py</code> to read data from the annotation platform or use the <a href="#">public API (link will follow)</a> or
+            upload you own data to <code>/beegfs/ws/1/s7740678-data_01/</code></li>
+        <li>Write computational expensive code (<strong>Can't access projects directory from compute node</strong>)</li>
+        <li>Test and execute your code. Log results to <a href="http://mlflow.172.26.62.216.nip.io/#/">http://mlflow.172.26.62.216.nip.io/#/</a></li>
+        <li>Move code execution to a <a href="https://doc.zih.tu-dresden.de/jobs_and_resources/slurm/#batch-jobs">sbatch file</a> and execute it from login node.</li>
+    </ol>
+    <h2>
+        <g-emoji class="g-emoji" alias="book" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4d6.png">📖</g-emoji>
+        Prerequisites
+    </h2>
+    <ul>
+        <li>You need to be connected to ZIH network for access to any software running on HPC or research cloud (e.g. via <a href="https://tu-dresden.de/zih/dienste/service-katalog/arbeitsumgebung/zugang_datennetz/vpn/ssl_vpn">Cisco anyconnect</a>)</li>
+        <li>Knowledge in python, conda environments and pytorch/keras</li>
+        <li>Familarise yourself with the <a href="https://doc.zih.tu-dresden.de/">HPC documentation</a></li>
+        <li>Check the <a href="https://mlflow.org/docs/latest/index.html">MLflow documentation</a></li>
+        <li>(Optional) VSCode or similar IDE with remote programming capabilities</li>
+        <li>(Optional) Look into our previous research: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8864866/">APL classification</a>, <a href="https://www.nature.com/articles/s41375-021-01408-w">NPM1 classification</a></li>
+    </ul>
+    <h2>
+        <g-emoji class="g-emoji" alias="computer" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4bb.png">💻</g-emoji>
+        Network architecture
+    </h2>
+    <div style="width: 100vw;position: absolute;left: 0;display: flex;justify-content: center;">
+        <iframe src="taurus_network_architecture_new.html" height="760" width="1162"></iframe>
+    </div>
+    <div style="height: 760px">&nbsp;</div>
+    <p>Currently we've deployed our software to 3 different systems:
+        <ul>
+            <li>The HPC is used for all Machine Learning code and generating visualizations</li>
+            <li>The ZIH research cloud hosts our MLflow server where our trainings and results are stored</li>
+            <li>A privately running server to make the Annotation platform accessible from outside the ZIH network</li>
+        </ul>
+        Communication between all systems is usually done through SSH for sending results, human-in-the-loop training and model inference. Data is transferred either via FTP upload in case of large datasets or via the API endpoints of the Annotation platform
+        or MLflow for smaller and often changing data. Large datasets used to train Machine Learning algorithms are stored in a <a href="https://doc.zih.tu-dresden.de/data_lifecycle/workspaces/">workspace</a> on the beegfs file system on HPC.
+    </p>
+    <h2>
+        <g-emoji class="g-emoji" alias="memo" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4dd.png">📝</g-emoji>
+        Programming on HPC
+    </h2>
+    <div style="width: 100vw;position: absolute;left: 0;display: flex;justify-content: center;">
+        <iframe src="programming_on_hpc.html" height="820" width="1162"></iframe>
+    </div>
+    <p></p>
+    <div style="height: 830px">&nbsp;</div>
+    <p>Let's start with understanding the structure of HPC ressources:
+        <ul>
+            <li>There are 3 different kinds of servers (Here "node") on HPC and each has it's own use cases:
+                <ol>
+                    <li>After connecting to the HPC you'll start on a login node, which has read and write access to all file systems and can start <a href="https://doc.zih.tu-dresden.de/jobs_and_resources/slurm/">Slurm Jobs</a>. You can not run computational
+                        expensive processes on those nodes, because they will interrupt (Not even copying large datasets).</li>
+                    <li>For the transfer of large datasets on/to/from HPC there are <a href="https://doc.zih.tu-dresden.de/data_transfer/overview/">special nodes</a>.</li>
+                    <li>Most code will be run on compute nodes, which are categorized into different architectures (called partitions) depending on your requirements. For our code we recommend the <a href="https://doc.zih.tu-dresden.de/software/machine_learning/#partition-alpha">"alpha"</a>                        partition (<strong>Not available at JupyterHub</strong>)</li>
+                </ol>
+            </li>
+            <li>There are also different kinds of file systems and directories with varying limitations:
+                <ol>
+                    <li>Your Home directory can hold a maximum of 50GB of data, but you can access it from all nodes.</li>
+                    <li>The Project Code Directory is a shared folder for all code in our group. <strong>This directory is only writable on login and export nodes, you can't write logs or results on compute nodes.</strong></li>
+                    <li><a href="https://doc.zih.tu-dresden.de/data_lifecycle/workspaces/">Workspaces</a> allow access to faster <a href="https://doc.zih.tu-dresden.de/data_lifecycle/file_systems/">filesystems</a> and are used to hold temporary data like
+                        logs and results.<strong> But they'll expire once in a while and there have been multiple crashes in the past so always(!!!) backup any important data</strong>. We use beegfs filesystem for training on large data amounts (and for
+                        conda environments, but more below).</li>
+                </ol>
+            </li>
+        </ul>
+        A typical workflow would look like this:
+        <ol>
+            <li>You can access HPC ressources either via terminal, an IDE with remote execution (i.e. VSCode) or Taurus JupyterHub depending on your preferences. For connection via terminal or VSCode you need to connect with <pre><code>ssh YOUR-ZIH-sNUMBER@taurus.hrsk.tu-dresden.de</code></pre>                JupyterHub is available <a href="https://taurus.hrsk.tu-dresden.de/jupyter/hub/spawn">HERE</a>
+                <ul>
+                    <li>JupyterHub will spawn a process on a compute node, which means <strong>no write access to projects directory</strong>. So you'll have to put your code inside your HOME directory or a workspace</li>
+                    <li>Terminal and VSCode will start at login node, so you can write your code to the projects directory, but you'll have to start a Slurm job or move to a compute node to execute it (if it's computational expensive)</li>
+                </ul>
+            </li>
+            <li>When you're writing code, you'll probably need some libraries. We recommend using our curated conda environments (<strong>Temporarily disabled, because workspaces have been lost and need to be recreated...</strong>), but you could also have
+                a look at the <a href="https://doc.zih.tu-dresden.de/software/modules/">HPC module system</a>, especially when using JupyterHub. Because the conda environments are too large for the HOME directory , they live inside a beegfs workspace
+                to allow installing packages from inside compute nodes:
+                <ul>
+                    <li>To use our conda environments you should use <pre><code>source /beegfs/ws/1/s7740678-condahome_01/x86_64/set_conda.sh</code></pre> for x86_64 architecture (alpha partition) or
+                        <pre><code>source /beegfs/ws/1/s7740678-condahome_01/ppc64/set_conda.sh</code></pre> for ppc64le partition. You can use <a href="./.bashrc">this .bashrc</a> to set it automatically.
+                    </li>
+                    <li>After setting the correct conda installation, you can load the environment depending on the partition you are working on. I.e.
+                        <pre><code>conda activate ml_pipeline_x86_64</code></pre> An advantage of using the "alpha" partition is the x86_64 architecture, which also runs on the login nodes. So you can reuse the "ml_pipeline_x86_64" environment e.g. when
+                        testing with <a href="https://code.visualstudio.com/docs/python/jupyter-support-py">VSCode python interactive window</a>.
+                    </li>
+                </ul>
+            </li>
+            <li>To test and run your computational expensive code you'll need to access compute nodes. With JupyterHub you're already inside, but when using the terminal/vscode you have to request access yourself:
+                <ul>
+                    <li>For testing/debugging we recommed to request the start of a tmux session on a compute node, which could look like this:
+                        <pre><code>run --pty -p alpha -n 1 -c 8 --gres=gpu:1 --mem=16G -C fs_beegfs -t 12:00:00 tmux</code></pre>
+                        <a href="https://slurm.schedmd.com/srun.html">Documentation for srun</a>
+                    </li>
+                    <li>After you made sure your code runs correctly on a compute node, you should move the execution command to an <a href="https://doc.zih.tu-dresden.de/jobs_and_resources/slurm/#batch-jobs">sbatch file</a>, which can be started from login
+                        nodes
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </p>
+    <h2>
+        <g-emoji class="g-emoji" alias="closed_book" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4d5.png">📕</g-emoji>
+        Our code base
+    </h2>
+    <p>Our most up-to-date repositories currently lie beneath <code>/projects/p_ai4hematology//code/s7740678/mds_diagnosis</code>. The demo files show some examples of reading data and using different models in inference mode. To check the code for training
+        our models you can have a look at
+        <code>/project/p_ai4hematology/code/s7740678/mds_diagnosis/libs/bms_ml_tools/bms_ml_tools/pytorch_pipeline/libs/hyper_classification/README.md</code> and for generating occlusion maps check <code>/home/s7740678/p_ai4hematology/code/s7740678/mds_diagnosis/libs/bms_ml_tools/bms_ml_tools/pytorch_pipeline/libs/create_viz/create_viz/README.md</code>
+    </p>
+    <h3>
+        <g-emoji class="g-emoji" alias="eyeglasses" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f453.png">👓</g-emoji>
+        Reading data
+    </h3>
+    <p>All large datasets (whole slide images, cell images) can be found beneath <code>/beegfs/ws/1/s7740678-data_01/</code> (<strong>Temporarily mostly empty, because workspaces have been lost and need to be recreated...</strong>). Description of data and
+        how to access the API of our annotation platform and log results to mlflow will follow...</p>
+    <h3>
+        <g-emoji class="g-emoji" alias="truck" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f69a.png">🚚</g-emoji>
+        Training a simple pytorch model
+    </h3>
+    <p>Can be found in above README, but we'll soon include a step by step here</p>
+    <h3>
+        <g-emoji class="g-emoji" alias="eyes" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f440.png">👀</g-emoji>
+        Generaing occlusion maps
+    </h3>
+    <p>Can be found in above README, but we'll soon include a step by step here</p>
+    <h3>
+        <g-emoji class="g-emoji" alias="memo" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4dd.png">📝</g-emoji>
+        Writing your own code
+    </h3>
+    <p>Currently all of our code is publicly read and writable, so please <strong>DO NOT DELETE OR MODIFIY</strong> any existing code. The recommended way is to either include existing code as library into your own code or copy the relevant parts. Git repositories
+        are not up-to-date, but can be updated if desired.</p>
 </div>
-<div style="height: 760px">&nbsp;</div>
