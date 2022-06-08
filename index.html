@@ -2,17 +2,33 @@
 layout: default 
 title: HPC manual 
 ---
-<div class="layout-clone" style='max-width: 64rem;padding: 2rem 6rem;margin:0 auto;font-size: 1.1rem;font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;'>
+<div class="layout-clone" >
     <style>
-        pre {
+        main .main-content pre {
             background: #eee;
             padding: 1em;
-            margin: 1em 0;
+            margin: 1em 0 0.3em 0;
         }
         
-        code {
-            font-size: 0.95rem;
+        .layout-clone {
+            max-width: 64rem;
+            padding: 2rem 6rem;
+            margin:0 auto;
+            font-size: 1.1rem;
+            font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;'
         }
+        
+        main .main-content .layout-clone {
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+            font-size: 1em;
+        }
+        
+        .layout-clone code {
+            font-size: 0.9rem;
+        }
+        
     </style>
     <h2>
         <g-emoji class="g-emoji" alias="zap" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/26a1.png">⚡️</g-emoji>
